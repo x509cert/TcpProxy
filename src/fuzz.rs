@@ -10,7 +10,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
         return Err(());
     }
 
-    let iterations = if rng.next_u32() % 100 >= 90 {
+    let iterations = if rng.next_u32() % 100 <= 90 {
         1
     } else {
         1 + rng.next_u32() % 5
