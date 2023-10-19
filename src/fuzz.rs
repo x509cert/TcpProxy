@@ -14,13 +14,13 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
         
     for _ in 0..iterations {
 
-        let which_mutation = rng.gen_range(0..9); 
+        let which_mutation = rng.gen_range(0..10); 
 
         // Decide on a mutation type
         match which_mutation {
             0 => {
                 // Mutation Type 0: Write random bytes at random positions
-                print!("R");
+                print!("Rnd");
                 let index = rng.gen_range(0..buffer.len());
                 let random_byte = rng.gen::<u8>();
                 buffer[index] = random_byte;
@@ -28,7 +28,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
 
             1 => {
                 // Mutation Type 1: Flip bits at random positions
-                print!("F");
+                print!("Flp");
                 let index = rng.gen_range(0..buffer.len());
                 let bit_to_flip = 1 << rng.gen_range(0..8); // Select a bit to flip
                 buffer[index] ^= bit_to_flip;
@@ -36,7 +36,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
 
             2 => {
                 // Mutation Type 2: Insert special characters at random positions
-                print!("S");
+                print!("Spc");
                 let special_chars = b"!@#$%^&*()-=_+[]{}|;:,.<>?/\\";
                 let index = rng.gen_range(0..buffer.len());
                 let special_char = *special_chars.choose(&mut rng).unwrap();
@@ -52,7 +52,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
 
             4 => {
                 // Mutation Type 4: Replace a subsection with alphanumeric characters
-                print!("P");
+                print!("Rpl");
                 let start = rng.gen_range(0..buffer.len()-1);
                 let end = rng.gen_range(start..buffer.len()-1);
                 for byte in &mut buffer[start..end] {
@@ -62,7 +62,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
 
             5 => {
                 // Mutation Type 5: Insert a random Unicode character
-                print!("U");
+                print!("Uni");
                 let index = rng.gen_range(0..buffer.len());
                 let codepoint = rng.gen_range(0x4E00..=0x9FFF);
                 let unicode_char = char::from_u32(codepoint).unwrap().to_string();
@@ -72,7 +72,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
 
             6 => {
                 // Mutation Type 6: Insert a random emoji
-                print!("E");
+                print!("Emj");
                 let index = rng.gen_range(0..buffer.len());
                 // example: emojis from U+1F600 to U+1F64F
                 let codepoint = rng.gen_range(0x1F600..=0x1F64F);
@@ -83,7 +83,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
 
             7 => {
                 // Mutation Type 7: Insert overlong UTF-8 escapes
-                print!("O");
+                print!("Ovl");
                 let index = rng.gen_range(0..buffer.len());
                 let base_char = rng.gen_range(0x00..=0x7F) as u8; // choosing a base ASCII character
                 
@@ -113,7 +113,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
 
             8 => {
                 // Mutation Type 8: Insert Unicode Variadic Selector
-                print!("V");
+                print!("Var");
                 const MAX_VARIADIC_SIZE:usize = 5;
                 let vchars = random_unicode_selector(&mut rng, MAX_VARIADIC_SIZE);
                 let mut index = rng.gen_range(0..buffer.len() - MAX_VARIADIC_SIZE);
@@ -124,7 +124,8 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
             }
 
             9 => {
-                // Mutation Type 9: Set or Rest the top-most bit
+                // Mutation Type 9: Set or Reset the top-most bit
+                print!("Top");
                 let start = rng.gen_range(0..buffer.len()-1);
                 let end = rng.gen_range(start..buffer.len()-1);
                 for byte in &mut buffer[start..end] {
