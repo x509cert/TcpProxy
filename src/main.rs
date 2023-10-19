@@ -1,7 +1,7 @@
 /*
 A simple TCP proxy fuzzer, just for the fun of it
 Michael Howard (mikehow@microsoft.com)
-Azure Datam Platform Security 
+Azure Data Platform Security 
 
 Future work
     Hook up:
