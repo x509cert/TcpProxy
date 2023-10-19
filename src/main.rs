@@ -1,18 +1,38 @@
-// A simple TCP proxy, just for the fun of it
-// Michael Howard (mikehow@microsoft.com)
-// Azure Database Security 
-// Oct, 12th 2023 - Initial
+/*
+A simple TCP proxy fuzzer, just for the fun of it
+Michael Howard (mikehow@microsoft.com)
+Azure Database Security 
 
-use tokio::io::{self, AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
-use tokio::select;
+Oct, 12th 2023 - Initial
+
+Future work
+    Update to hook up:
+    - fuzzing direction
+    - aggressiveness
+*/
+
+use getopts::Options;
+use std::env;
+use tokio::{io::{self, AsyncReadExt, AsyncWriteExt}, 
+    net::{TcpListener, TcpStream}, select};
+
+struct ParsedArgs {
+    proxy: String,
+    server: String,
+    direction: String,
+    aggressiveness: u8
+}
 
 mod fuzz;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    let client = "127.0.0.1:1533";
-    let server = "127.0.0.1:1433";
+
+    // example cmd-line: -p 127.0.0.1:8080 -s 192.168.1.20:9000 -d b -a 75
+    let args = parse_args();
+
+    let client: &str = &args.proxy;
+    let server: &str = &args.server;
     
     let listener = TcpListener::bind(client).await?;
 
@@ -46,7 +66,7 @@ async fn main() -> io::Result<()> {
                 match oread.read(&mut buf).await {
                     Ok(0) => return,
                     Ok(n) => {
-                        // Fuzz server to client traffic
+                        // Fuzz server to client traffic, don't care about the return
                         _ = fuzz::fuzz_buffer(&mut buf, 10);
                         ewrite.write_all(&buf[..n]).await.expect("Failed to write to client");
                     }
@@ -60,5 +80,39 @@ async fn main() -> io::Result<()> {
             _ = task_c2s => {},
             _ = task_s2c => {},
         }
+    }
+}
+
+fn parse_args() -> ParsedArgs {
+    let args: Vec<String> = env::args().collect();
+    let mut opts = Options::new();
+
+    opts.optopt("p", "proxy", "Set proxy IP address and port (format: IP:PORT)", "IP:PORT");
+    opts.optopt("s", "server", "Set server IP address and port (format: IP:PORT)", "IP:PORT");
+    opts.optopt("d", "direction", "Set direction (b, c, or s)", "DIRECTION");
+    opts.optopt("a", "aggressiveness", "Set aggressiveness (1-100)", "VALUE");
+
+    let matches = opts.parse(&args[1..]).expect("Failed to parse arguments");
+
+    let proxy = matches.opt_str("p").expect("Proxy not provided");
+    let server = matches.opt_str("s").expect("Server not provided");
+
+    let direction = matches.opt_str("d").expect("Direction not provided");
+    if !["b", "c", "s"].contains(&direction.as_str()) {
+        panic!("Invalid direction value!");
+    }
+
+    let aggressiveness_str = matches.opt_str("a").unwrap_or("33".to_string());
+    let aggressiveness = aggressiveness_str.parse::<u8>().expect("Aggressiveness must be a number");
+    if aggressiveness < 1 || aggressiveness > 100 {
+        panic!("Aggressiveness value out of range!");
+    }
+
+    // return the args
+    ParsedArgs {
+        proxy,
+        server,
+        direction,
+        aggressiveness
     }
 }
