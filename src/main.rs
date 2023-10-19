@@ -4,7 +4,7 @@ Michael Howard (mikehow@microsoft.com)
 Azure Datam Platform Security 
 
 Future work
-    Update to hook up:
+    Hook up:
     - fuzzing direction
     - aggressiveness
 */
@@ -17,8 +17,8 @@ use tokio::{io::{self, AsyncReadExt, AsyncWriteExt},
 struct ParsedArgs {
     proxy: String,
     server: String,
-    direction: String,
-    aggressiveness: u8
+    direction: String,      // presently unused
+    aggressiveness: u8      // same
 }
 
 mod fuzz;
@@ -87,8 +87,8 @@ fn parse_args() -> ParsedArgs {
 
     opts.optopt("p", "proxy", "Set proxy IP address and port (format: IP:PORT)", "IP:PORT");
     opts.optopt("s", "server", "Set server IP address and port (format: IP:PORT)", "IP:PORT");
-    opts.optopt("d", "direction", "Set direction (b, c, or s)", "DIRECTION");
-    opts.optopt("a", "aggressiveness", "Set aggressiveness (1-100)", "VALUE");
+    opts.optopt("d", "direction", "Set direction (b (bi-di), c (server->client), or s (client->server))", "DIRECTION");
+    opts.optopt("a", "aggressiveness", "Set fuzzing aggressiveness (1-100)", "VALUE");
 
     let matches = opts.parse(&args[1..]).expect("Failed to parse arguments");
 
