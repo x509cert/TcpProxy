@@ -34,17 +34,17 @@ async fn main() -> io::Result<()> {
         let (client, _) = listener.accept().await?;
         let server = TcpStream::connect(server).await?;
 
-        let (mut eread, mut ewrite) = client.into_split();
-        let (mut oread, mut owrite) = server.into_split();
+        let (mut cread, mut cwrite) = client.into_split();
+        let (mut sread, mut swrite) = server.into_split();
 
         let task_c2s = tokio::spawn(async move {
             loop {
-                match eread.read(&mut buf).await {
+                match cread.read(&mut buf).await {
                     Ok(0) => return,
                     Ok(n) => {
                         // Modify buf here if needed (from client to server)    
                         // TODO                  
-                        owrite.write_all(&buf[..n]).await.expect("Failed to write to server");
+                        swrite.write_all(&buf[..n]).await.expect("Failed to write to server");
                     }
                     Err(_) => return,
                 }
@@ -53,12 +53,12 @@ async fn main() -> io::Result<()> {
 
         let task_s2c = tokio::spawn(async move {
             loop {
-                match oread.read(&mut buf).await {
+                match sread.read(&mut buf).await {
                     Ok(0) => return,
                     Ok(n) => {
                         // Fuzz server to client traffic, don't care about the return
                         _ = fuzz::fuzz_buffer(&mut buf, 10);
-                        ewrite.write_all(&buf[..n]).await.expect("Failed to write to client");
+                        cwrite.write_all(&buf[..n]).await.expect("Failed to write to client");
                     }
                     Err(_) => return,
                 }
