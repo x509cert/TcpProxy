@@ -1,9 +1,7 @@
 /*
 A simple TCP proxy fuzzer, just for the fun of it
 Michael Howard (mikehow@microsoft.com)
-Azure Database Security 
-
-Oct, 12th 2023 - Initial
+Azure Datam Platform Security 
 
 Future work
     Update to hook up:
