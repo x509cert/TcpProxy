@@ -57,8 +57,8 @@ async fn main() -> io::Result<()> {
                     Ok(0) => return,
                     Ok(n) => {
                         // Fuzz server to client traffic, don't care about the return
-                        _ = fuzz::fuzz_buffer(&mut buf, 10);
-                        cwrite.write_all(&buf[..n]).await.expect("Failed to write to client");
+                        let _res = fuzz::fuzz_buffer(&mut buf, 10);
+                        cwrite.write_all(&buf[..n]).await.expect("Failed to write to client")
                     }
                     Err(_) => return,
                 }

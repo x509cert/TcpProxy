@@ -2,8 +2,9 @@ use rand::prelude::*;
 use rand::distributions::Alphanumeric;
 use rand::{Rng, distributions::Uniform};
 
-pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
+pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
 
+    let n = buffer.len();
     let mut rng = rand::thread_rng();
 
     if (rng.next_u32() % 100) >= aggressiveness {
@@ -146,7 +147,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<(),()> {
     // new line after each fuzzed packet
     println!();
 
-    Ok(())
+    Ok(n)
 }
 
 
