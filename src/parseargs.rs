@@ -1,11 +1,20 @@
 use getopts::Options;
 use std::env;
 
+#[derive(Debug)]
+#[derive(PartialEq, Eq, Clone, Copy)]
+pub enum FuzzDirection {
+    ClientToServer,
+    ServerToClient,
+    Both,
+    None,
+}
+
 pub struct ParsedArgs {
     pub proxy: String,
     pub server: String,
-    pub direction: String,      // presently unused
-    pub aggressiveness: u8      // same
+    pub direction: FuzzDirection,      
+    pub aggressiveness: u32     
 }
 
 pub fn parse_args() -> ParsedArgs {
@@ -22,14 +31,16 @@ pub fn parse_args() -> ParsedArgs {
     let proxy = matches.opt_str("p").expect("Proxy not provided");
     let server = matches.opt_str("s").expect("Server not provided");
 
-    let direction = matches.opt_str("d").expect("Direction not provided");
-    if !["b", "c", "s"].contains(&direction.as_str()) {
-        panic!("Invalid direction value!");
-    }
+    let direction = match matches.opt_str("d").unwrap_or("n".to_string()).as_str() {
+        "s" => FuzzDirection::ClientToServer,
+        "c" => FuzzDirection::ServerToClient,
+        "b" => FuzzDirection::Both,
+        _ => FuzzDirection::None,
+    };
 
-    let aggressiveness_str = matches.opt_str("a").unwrap_or("33".to_string());
-    let aggressiveness = aggressiveness_str.parse::<u8>().expect("Aggressiveness must be a number");
-    if aggressiveness < 1 || aggressiveness > 100 {
+    let aggressiveness_str = matches.opt_str("a").unwrap_or("10".to_string());
+    let aggressiveness: u32 = aggressiveness_str.parse::<u32>().expect("Aggressiveness must be a number between 0-100");
+    if !(0..=100).contains(&aggressiveness) {
         panic!("Aggressiveness value out of range!");
     }
 
