@@ -33,7 +33,7 @@ async fn main() -> io::Result<()> {
 
     println!("Rusty Proxy Fuzzer {}\nWritten by Michael Howard\nAzure Data Platform. Microsoft Corp.", env!("CARGO_PKG_VERSION"));
     println!("Proxying {} -> {}", client, server);
-    println!("Fuzzing direction is {:?} with aggressiveness {}", direction, aggressiveness);
+    println!("Fuzzing direction is {:?} with aggressiveness {}%", direction, aggressiveness);
 
     loop {
         let mut buf: [u8; 4096] = [0; 4096];
