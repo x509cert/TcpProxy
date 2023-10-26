@@ -50,7 +50,9 @@ async fn main() -> io::Result<()> {
                     Ok(0) => return,
                     Ok(n) => {
                         // Modify buf here if needed (from client to server)    
-                        // TODO                  
+                        if (direction == FuzzDirection::ClientToServer || direction == FuzzDirection::Both) && aggressiveness > 0 {
+                            let _res = fuzz::fuzz_buffer(&mut buf, aggressiveness);
+                        } 
                         swrite.write_all(&buf[..n]).await.expect("Failed to write to server");
                     }
                     Err(_) => return,
