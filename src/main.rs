@@ -3,10 +3,6 @@ A simple TCP proxy fuzzer, just for the fun of it
 Michael Howard (mikehow@microsoft.com)
 Azure Data Platform Security 
 
-Future work
-    Hook up:
-    - fuzzing direction
-    - aggressiveness
 */
 
 use tokio::{io::{self, AsyncReadExt, AsyncWriteExt}, 
