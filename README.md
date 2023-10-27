@@ -3,8 +3,7 @@ A simple multi-threaded TCP Proxy Fuzzer written in Rust.
 
 Usage is:
 
-
-TcpProxy -s <server_ip:port> -p <proxy_ip:port> -d <b|c|s|n> [-a 1-100]
+  TcpProxy -s <server_ip:port> -p <proxy_ip:port> -d <b|c|s|n> [-a 0-100]
 
 Where:
 
