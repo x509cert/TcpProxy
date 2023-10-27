@@ -1,4 +1,4 @@
-# Rust TcpProxyFuzzer
+# Rust TCP Proxy Fuzzer
 A simple multi-threaded TCP Proxy Fuzzer written in Rust.
 
 Usage is:
