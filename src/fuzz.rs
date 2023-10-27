@@ -38,7 +38,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
             2 => {
                 // Mutation Type 2: Insert special characters at random positions
                 print!("Spc");
-                let special_chars = b"!@#$%^&*()-=_+[]{}|;:,.<>?/\\";
+                let special_chars = b" `~!@#$%^&*()-=_+[]{}|;:,.<>?/\\\n\r\t";
                 let index = rng.gen_range(0..buffer.len());
                 let special_char = *special_chars.choose(&mut rng).unwrap();
                 buffer[index] = special_char;

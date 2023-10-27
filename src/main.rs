@@ -2,7 +2,6 @@
 A simple TCP proxy fuzzer, just for the fun of it
 Michael Howard (mikehow@microsoft.com)
 Azure Data Platform Security 
-
 */
 
 use tokio::{io::{self, AsyncReadExt, AsyncWriteExt}, 
@@ -11,6 +10,8 @@ use tokio::{io::{self, AsyncReadExt, AsyncWriteExt},
 mod fuzz;
 mod parseargs;
 use parseargs::FuzzDirection;
+
+const BUFF_SIZE: usize = 4096;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -36,7 +37,7 @@ async fn main() -> io::Result<()> {
     println!("Fuzzing direction is {:?} with aggressiveness {}%", direction, aggressiveness);
 
     loop {
-        let mut buf: [u8; 4096] = [0; 4096];
+        let mut buf: [u8; BUFF_SIZE] = [0; BUFF_SIZE];
 
         let (client, _) = listener.accept().await?;
         let server = TcpStream::connect(server).await?;
@@ -49,7 +50,6 @@ async fn main() -> io::Result<()> {
                 match cread.read(&mut buf).await {
                     Ok(0) => return,
                     Ok(n) => {
-                        // Modify buf here if needed (from client to server)    
                         if (direction == FuzzDirection::ClientToServer || direction == FuzzDirection::Both) && aggressiveness > 0 {
                             let _res = fuzz::fuzz_buffer(&mut buf, aggressiveness);
                         } 
@@ -65,8 +65,6 @@ async fn main() -> io::Result<()> {
                 match sread.read(&mut buf).await {
                     Ok(0) => return,
                     Ok(n) => {
-                        // 'c' == Fuzz server -> client traffic, 'b' == both drections
-                        // don't care about the return
                         if (direction == FuzzDirection::ServerToClient || direction == FuzzDirection::Both) && aggressiveness > 0 {
                             let _res = fuzz::fuzz_buffer(&mut buf, aggressiveness);
                         }
