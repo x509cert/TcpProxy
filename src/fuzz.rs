@@ -4,10 +4,10 @@ use rand::{Rng, distributions::Uniform};
 
 pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
 
-    let n = buffer.len();
+    let mut bufferlen = buffer.len();
     let mut rng = rand::thread_rng();
 
-    if (rng.next_u32() % 100) >= aggressiveness {
+    if rng.gen_range(0..100) >= aggressiveness {
         return Err(());
     }
 
@@ -46,9 +46,11 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
 
             3 => {
                 // Mutation Type 3: Data truncation
-                //print!("T");
-                //let new_size = rng.gen_range(0..buffer.len());
-                //buffer.truncate(new_size); TODO
+                print!("Tru");
+                // truncate no more than 10% of the data from the buffer end
+                // the truncation is performed by the called by looking at the Ok(N) value
+                let buflen = buffer.len();
+                bufferlen = rng.gen_range(buflen - buflen/10..=buflen);
             }
 
             4 => {
@@ -72,7 +74,20 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
             }
 
             6 => {
-                // Mutation Type 6: Insert a random emoji
+                // Mutation Type 6: Insert a Unicode Variant Selector byte sequence
+                println!("Vsu");
+            
+                let random_unicode_value = char::from_u32(rng.gen_range(0xFE00..=0xFE0F)).unwrap();
+                let random_bytes: Vec<u8> = random_unicode_value.to_string().into_bytes();
+                let overwrite_position = rng.gen_range(0..buffer.len() - random_bytes.len() + 1);
+
+                for (offset, &byte) in random_bytes.iter().enumerate() {
+                    buffer[overwrite_position + offset] = byte;
+                }
+            }
+
+            7 => {
+                // Mutation Type 7: Insert a random emoji
                 print!("Emj");
                 let index = rng.gen_range(0..buffer.len());
                 // example: emojis from U+1F600 to U+1F64F
@@ -82,8 +97,8 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
                 buffer[index..index + emoji_bytes.len()].copy_from_slice(&emoji_bytes[0..emoji_bytes.len()]);
             }
 
-            7 => {
-                // Mutation Type 7: Insert overlong UTF-8 escapes
+            8 => {
+                // Mutation Type 8: Insert overlong UTF-8 escapes
                 print!("Ovl");
                 let index = rng.gen_range(0..buffer.len());
                 let base_char = rng.gen_range(0x00..=0x7F) as u8; // choosing a base ASCII character
@@ -112,8 +127,8 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
                 buffer[index..index + overlong.len()].copy_from_slice(&overlong[0..overlong.len()]);
             }
 
-            8 => {
-                // Mutation Type 8: Insert Unicode Variadic Selector
+            9 => {
+                // Mutation Type 9: Insert Unicode Variadic Selector
                 print!("Var");
                 const MAX_VARIADIC_SIZE:usize = 5;
                 let vchars = random_unicode_selector(&mut rng, MAX_VARIADIC_SIZE);
@@ -124,8 +139,8 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
                 }
             }
 
-            9 => {
-                // Mutation Type 9: Set or Reset the top-most bit
+            10 => {
+                // Mutation Type 10: Set or Reset the top-most bit
                 print!("Top");
                 let start = rng.gen_range(0..buffer.len()-1);
                 let end = rng.gen_range(start..buffer.len()-1);
@@ -147,7 +162,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
     // new line after each fuzzed packet
     println!();
 
-    Ok(n)
+    Ok(bufferlen)
 }
 
 
