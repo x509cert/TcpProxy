@@ -15,7 +15,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Result<usize,()> {
         
     for _ in 0..iterations {
 
-        let which_mutation = rng.gen_range(0..10); 
+        let which_mutation = rng.gen_range(0..=10); 
 
         // Decide on a mutation type
         match which_mutation {

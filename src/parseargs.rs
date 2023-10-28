@@ -38,7 +38,7 @@ pub fn parse_args() -> ParsedArgs {
         _ => FuzzDirection::None,
     };
 
-    let aggressiveness_str = matches.opt_str("a").unwrap_or("10".to_string());
+    let aggressiveness_str = matches.opt_str("a").unwrap_or("25".to_string());
     let aggressiveness: u32 = aggressiveness_str.parse::<u32>().expect("Aggressiveness must be a number between 0-100");
     if !(0..=100).contains(&aggressiveness) {
         panic!("Aggressiveness value out of range!");

@@ -65,10 +65,11 @@ async fn main() -> io::Result<()> {
                 match sread.read(&mut buf).await {
                     Ok(0) => return,
                     Ok(n) => {
+                        let mut bufferlen = n;
                         if (direction == FuzzDirection::ServerToClient || direction == FuzzDirection::Both) && aggressiveness > 0 {
-                            let _res = fuzz::fuzz_buffer(&mut buf, aggressiveness);
+                            bufferlen = fuzz::fuzz_buffer(&mut buf, aggressiveness).unwrap(); 
                         }
-                        cwrite.write_all(&buf[..n]).await.expect("Failed to write to client")
+                        cwrite.write_all(&buf[..bufferlen]).await.expect("Failed to write to client")
                     }
                     Err(_) => return,
                 }
