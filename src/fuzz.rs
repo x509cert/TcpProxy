@@ -11,8 +11,8 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Option<usize> {
         return None;
     }
 
-    let iterations = 1 + rng.next_u32() % 5;
-        
+    // how many mutations should be do over a block?
+    let iterations = rng.gen_range(1..=5);
     for _ in 0..iterations {
 
         let which_mutation = rng.gen_range(0..=10); 
@@ -78,7 +78,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Option<usize> {
                 println!("Vsu");
             
                 let random_unicode_value = char::from_u32(rng.gen_range(0xFE00..=0xFE0F)).unwrap();
-                let random_bytes: Vec<u8> = random_unicode_value.to_string().into_bytes();
+                let random_bytes = random_unicode_value.to_string().into_bytes();
                 let overwrite_position = rng.gen_range(0..buffer.len() - random_bytes.len() + 1);
 
                 for (offset, &byte) in random_bytes.iter().enumerate() {
