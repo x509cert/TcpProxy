@@ -153,15 +153,15 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Option<usize> {
                 }
             }
 
-            _ => {
-                // Default: Do nothing
-            }
+            // Default: Do nothing
+            _ => { }
         }
     }
 
     // new line after each fuzzed packet
     println!();
 
+    // return the buffer length which might be truncated
     Some(bufferlen)
 }
 
