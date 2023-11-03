@@ -9,7 +9,10 @@ use tokio::{io::{self, AsyncReadExt, AsyncWriteExt},
 
 mod fuzz;
 mod parseargs;
+mod naughty;
+
 use parseargs::FuzzDirection;
+use naughty::read_naughty_words;
 
 const BUFF_SIZE: usize = 4096;
 
@@ -32,7 +35,19 @@ async fn main() -> io::Result<()> {
     
     let listener = TcpListener::bind(client).await?;
 
-    println!("Rusty Proxy Fuzzer {}\nWritten by Michael Howard\nAzure Data Platform. Microsoft Corp.", env!("CARGO_PKG_VERSION"));
+    println!("\n\n\nRusty Proxy Fuzzer {}\nWritten by Michael Howard\nAzure Data Platform. Microsoft Corp.", env!("CARGO_PKG_VERSION"));
+
+    // get naughty strings from file system
+    let file_paths = vec!["json.txt", "naughty.txt", "html5.txt"];
+    println!("Reading the following 'naughty' word files, which might take a moment:");
+    for file_path in &file_paths {
+        println!("  {}", file_path);
+    }
+
+    // Call the function and get the contents in separate vectors
+    let naughty_words = read_naughty_words(file_paths.clone()).await?;
+
+    println!("All files have been read!");
     println!("Proxying {} -> {}", client, server);
     println!("Fuzzing direction is {:?} with aggressiveness {}%", direction, aggressiveness);
 
@@ -68,10 +83,9 @@ async fn main() -> io::Result<()> {
                         let mut bufferlen = n;
                         if (direction == FuzzDirection::ServerToClient || direction == FuzzDirection::Both) && aggressiveness > 0 {
                             let result =  fuzz::fuzz_buffer(&mut buf, aggressiveness);
-                            match result {
-                                Some(v) => bufferlen = v,
-                                None => {}
-                            } 
+                            if let Some(v) = result {
+                                bufferlen = v;
+                            }  
                         }
                         cwrite.write_all(&buf[..bufferlen]).await.expect("Failed to write to client")
                     }
