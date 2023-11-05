@@ -76,7 +76,7 @@ static MAPPINGS: phf::Map<char, &'static str> = phf_map! {
     '\'' => "′‘’｀"
 };
 
-fn obfuscate(input: &str) -> String {
+pub fn insert_pseudoloc(input: &str) -> String {
     input.chars()
         .map(|ch| {
             MAPPINGS.get(&ch)
@@ -86,8 +86,10 @@ fn obfuscate(input: &str) -> String {
         .collect()
 }
 
+/* 
 fn main() {
     let input = "Hello World! Today is October 19th, 2023.";
     let obfuscated = obfuscate(input);
     println!("{}", obfuscated);
 }
+*/

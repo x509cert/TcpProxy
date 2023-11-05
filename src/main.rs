@@ -35,19 +35,24 @@ async fn main() -> io::Result<()> {
     
     let listener = TcpListener::bind(client).await?;
 
-    println!("\n\n\nRusty Proxy Fuzzer {}\nWritten by Michael Howard\nAzure Data Platform. Microsoft Corp.", env!("CARGO_PKG_VERSION"));
+    println!("\nRusty Proxy Fuzzer {}\nWritten by Michael Howard\nAzure Data Platform. Microsoft Corp.", env!("CARGO_PKG_VERSION"));
 
     // get naughty strings from file system
-    let file_paths = vec!["json.txt", "naughty.txt", "html5.txt"];
-    println!("Reading the following 'naughty' word files, which might take a moment:");
-    for file_path in &file_paths {
-        println!("  {}", file_path);
+    let mut file_paths: Vec<&str> = vec![];
+    if !args.naughty.is_empty()  {
+        if args.naughty.contains('h') { file_paths.push("html5.txt");}
+        if args.naughty.contains('j') { file_paths.push("json.txt");}
+        if args.naughty.contains('n') { file_paths.push("naughty.txt");}
+        if args.naughty.contains('s') { file_paths.push("sql.txt");}
+        if args.naughty.contains('x') { file_paths.push("xml.txt");}
+        if args.naughty.contains('y') { file_paths.push("xss.txt");}
+        if args.naughty.contains('z') { file_paths.push("xxe.txt");}
     }
 
-    // Call the function and get the contents in separate vectors
     let naughty_words = read_naughty_words(file_paths.clone()).await?;
-
-    println!("All files have been read!");
+    if !naughty_words.is_empty() {
+        println!("All 'naughty' files are read!");
+    }
     println!("Proxying {} -> {}", client, server);
     println!("Fuzzing direction is {:?} with aggressiveness {}%", direction, aggressiveness);
 
