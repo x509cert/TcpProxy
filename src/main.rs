@@ -72,7 +72,7 @@ async fn main() -> io::Result<()> {
                     Ok(0) => return,
                     Ok(n) => {
                         if (direction == FuzzDirection::ClientToServer || direction == FuzzDirection::Both) && aggressiveness > 0 {
-                            let _res = fuzz::fuzz_buffer(&mut buf, aggressiveness);
+                            let _res = fuzz::fuzz_buffer(&mut buf, &naughty_words, aggressiveness);
                         } 
                         swrite.write_all(&buf[..n]).await.expect("Failed to write to server");
                     }
@@ -88,7 +88,7 @@ async fn main() -> io::Result<()> {
                     Ok(n) => {
                         let mut bufferlen = n;
                         if (direction == FuzzDirection::ServerToClient || direction == FuzzDirection::Both) && aggressiveness > 0 {
-                            let result =  fuzz::fuzz_buffer(&mut buf, aggressiveness);
+                            let result =  fuzz::fuzz_buffer(&mut buf, &naughty_words, aggressiveness);
                             if let Some(v) = result {
                                 bufferlen = v;
                             }  

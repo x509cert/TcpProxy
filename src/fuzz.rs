@@ -2,7 +2,7 @@ use rand::prelude::*;
 use rand::distributions::Alphanumeric;
 use rand::{Rng, distributions::Uniform};
 
-pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Option<usize> {
+pub fn fuzz_buffer(buffer: &mut [u8], naughty_words: &Vec<String>, aggressiveness: u32) -> Option<usize> {
 
     let mut bufferlen = buffer.len();
     let mut rng = rand::thread_rng();
@@ -15,7 +15,7 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Option<usize> {
     let iterations = rng.gen_range(1..=5);
     for _ in 0..iterations {
 
-        let which_mutation = rng.gen_range(0..=10); 
+        let which_mutation = rng.gen_range(0..=11); 
 
         // Decide on a mutation type
         match which_mutation {
@@ -151,6 +151,13 @@ pub fn fuzz_buffer(buffer: &mut [u8], aggressiveness: u32) -> Option<usize> {
                         *byte &= 0x7F;
                     }
                 }
+            }
+
+            11 => {
+                // Mutation Type 11: Add a naughty word
+                print!("Nau");
+                let start = = rng.gen_range(0..(buffer.len()/10)-1);
+                todo!();
             }
 
             // Default: Do nothing
