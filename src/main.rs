@@ -51,8 +51,12 @@ async fn main() -> io::Result<()> {
 
     let naughty_words = read_naughty_words(file_paths.clone()).await?;
     if !naughty_words.is_empty() {
-        println!("All 'naughty' files are read!");
+        println!("All 'naughty' files read, {} lines", naughty_words.len());
+        for ln in naughty_words {
+            println!("{}\n",ln);
+        }
     }
+
     println!("Proxying {} -> {}", client, server);
     println!("Fuzzing direction is {:?} with aggressiveness {}%", direction, aggressiveness);
 
